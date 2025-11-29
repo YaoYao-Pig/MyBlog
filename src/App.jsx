@@ -16,9 +16,6 @@ const MOCK_FILE_SYSTEM = {
     { name: "C#", type: "folder", children: [
         { name: "Create C#多态.md", type: "file", content: "# C# 多态性\n\n多态性是OOP的三大支柱之一..." }
     ]},
-    { name: "C++", type: "folder", children: [
-        { name: "C++栈调用.md", type: "file", content: "# C++ 栈调用分析\n\n函数调用栈帧的详细解析..." }
-    ]},
     { name: "Lua", type: "folder", children: [
         { name: "XLua穿梭成本.md", type: "file", content: "# XLua 穿梭成本优化\n\nC#与Lua交互的性能开销..." }
     ]}
@@ -145,12 +142,16 @@ export default function App() {
   const [viewState, setViewState] = useState('list'); 
   const [loading, setLoading] = useState(true);
 
+  // 获取 Vite 配置的 base 路径
+  const BASE_URL = import.meta.env.BASE_URL;
+
   // 核心逻辑：加载真实数据
   useEffect(() => {
     async function initSystem() {
       try {
         console.log("正在连接神经元网络...");
-        const response = await fetch('/structure.json');
+        // 使用 BASE_URL 拼接路径，确保在子目录下也能找到文件
+        const response = await fetch(`${BASE_URL}structure.json`);
         
         if (!response.ok) throw new Error("Local Data Link Offline");
         
@@ -179,7 +180,8 @@ export default function App() {
       
       if (!node.content && node.path) {
         try {
-            const res = await fetch(`/content/${node.path}`);
+            // 同样使用 BASE_URL 拼接内容路径
+            const res = await fetch(`${BASE_URL}content/${node.path}`);
             const text = await res.text();
             setCurrentNode({ ...node, content: text });
         } catch (e) {
@@ -234,7 +236,7 @@ export default function App() {
           <GlitchText text="YAOYAO_PIG.LOG" className="font-bold font-mono text-xl tracking-tighter" />
         </div>
         <div className="flex items-center space-x-6 text-sm font-mono">
-          <a href="https://github.com/YaoYao-Pig" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 hover:text-[#00f0ff] transition-colors">
+          <a href="[https://github.com/YaoYao-Pig](https://github.com/YaoYao-Pig)" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 hover:text-[#00f0ff] transition-colors">
             <Github size={16} /> <span>GITHUB</span>
           </a>
           <div className="hidden md:flex items-center space-x-4">
