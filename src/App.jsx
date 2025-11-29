@@ -158,11 +158,25 @@ export default function App() {
       setViewState('read');
       if (!node.content && node.path) {
         try {
-            const res = await fetch(`${BASE_URL}content/${node.path}`);
+            // FIX: 修复 URL 编码问题 (处理 C# 中的 #)
+            // 我们需要把路径按 / 分割，对每一段进行编码，再重新拼接
+            const encodedPath = node.path.split('/').map(segment => encodeURIComponent(segment)).join('/');
+            
+            const res = await fetch(`${BASE_URL}content/${encodedPath}`);
+            
+            // FIX: 检查响应状态，如果是 404 则抛出错误，避免将 404 HTML 当作 Markdown 渲染
+            if (!res.ok) {
+                throw new Error(`HTTP Error: ${res.status}`);
+            }
+
             const text = await res.text();
             setCurrentNode({ ...node, content: text });
         } catch (e) {
-            setCurrentNode({ ...node, content: "# ERROR 404\nDATA CORRUPTED." });
+            console.error("Fetch Error:", e);
+            setCurrentNode({ 
+                ...node, 
+                content: `# ERROR 404 / ${e.message}\n\n**读取失败：**\n\n1. 请检查该文件是否包含特殊字符。\n2. 确保 GitHub Pages 已更新。\n3. 原文路径: \`${node.path}\`` 
+            });
         }
       } else {
         setCurrentNode(node);
