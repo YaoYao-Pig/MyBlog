@@ -13,7 +13,7 @@ import ReactMarkdown from 'react-markdown';
 // ==========================================
 const USER_INFO = {
   name: "YaoYao-Pig",
-  avatar: "[https://github.com/YaoYao-Pig.png](https://github.com/YaoYao-Pig.png)", // 自动抓取 GitHub 头像
+  avatar: "https://github.com/YaoYao-Pig.png", // 自动抓取 GitHub 头像
   school: "ECNU",
   email: "s20020515@163.com",
   bio: "Game Developer",
@@ -26,25 +26,24 @@ const PROJECTS_DATA = [
     name: "YaoYaoPigStudyNote", 
     desc: "核心知识库 / 个人笔记系统", 
     tech: ["Markdown", "Git", "Knowledge"],
-    link: "[https://github.com/YaoYao-Pig/YaoYaoPigStudyNote](https://github.com/YaoYao-Pig/YaoYaoPigStudyNote)"
+    link: "https://github.com/YaoYao-Pig/YaoYaoPigStudyNote"
   },
   { 
     id: 2, 
     name: "Dx12Render", 
     desc: "基于DX12的图形学渲染流程学习", 
     tech: ["Dx12", "Compute Graph", "PBR"],
-    link: "[https://github.com/YaoYao-Pig/Dx12Render](https://github.com/YaoYao-Pig/Dx12Render)"
+    link: "https://github.com/YaoYao-Pig/Dx12Render"
   },
   { 
     id: 3, 
     name: "SimpleLockStepFrameWork", 
     desc: "基于自己实现的帧同步框架和确定性碰撞的简单动作游戏Demo", 
     tech: ["Unity", "LockStep", "物理碰撞"],
-    link: "[https://github.com/YaoYao-Pig/SimpleLockStepFrameWork](https://github.com/YaoYao-Pig/SimpleLockStepFrameWork)"
+    link: "https://github.com/YaoYao-Pig/SimpleLockStepFrameWork"
   },
   // 复制上面的块添加更多项目...
 ];
-
 // --- 模拟数据 (备份用) ---
 const MOCK_FILE_SYSTEM = {
   name: "root",
@@ -95,6 +94,26 @@ const GlitchText = ({ text, className = "", as: Component = "h1" }) => (
     <Component className="relative z-10">{text}</Component>
     <Component className="absolute top-0 left-0 -z-10 w-full h-full text-[#ff003c] opacity-0 group-hover:opacity-70 animate-pulse translate-x-[2px]">{text}</Component>
     <Component className="absolute top-0 left-0 -z-10 w-full h-full text-[#00f0ff] opacity-0 group-hover:opacity-70 animate-pulse -translate-x-[2px]">{text}</Component>
+  </div>
+);
+
+// --- 组件: 面包屑导航 (修复补全) ---
+const Breadcrumbs = ({ path, onNavigate }) => (
+  <div className="flex items-center space-x-2 text-sm font-mono mb-8 text-gray-400 overflow-x-auto">
+    <span className="text-[#ff003c] font-bold">root@yaoyao-pig:~/</span>
+    {path.map((item, idx) => (
+      <React.Fragment key={idx}>
+        <motion.span
+          whileHover={{ color: "#00ff41", scale: 1.1 }}
+          onClick={() => onNavigate(idx)}
+          className="cursor-pointer hover:underline whitespace-nowrap"
+        >
+          {item.name}
+        </motion.span>
+        {idx < path.length - 1 && <ChevronRight size={14} />}
+      </React.Fragment>
+    ))}
+    <span className="animate-pulse text-[#00ff41]">_</span>
   </div>
 );
 
