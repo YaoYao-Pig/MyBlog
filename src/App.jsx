@@ -17,7 +17,7 @@ const USER_INFO = {
   school: "ECNU",
   email: "s20020515@163.com",
   bio: "Game Developer",
-  intro: "On my student card, I am a student. In my mind, I want to be a game developer. But in my heart, I am a gamer."
+  intro: "On my student card, I am a student. \nIn my mind, I want to be a game developer. \nBut in my heart, I am a gamer."
 };
 
 const PROJECTS_DATA = [
@@ -238,7 +238,7 @@ export default function App() {
         </nav>
 
         <div className="flex items-center space-x-4 text-sm font-mono">
-           <a href="[https://github.com/YaoYao-Pig](https://github.com/YaoYao-Pig)" target="_blank" className="hover:text-[#00f0ff]"><Github size={18} /></a>
+           <a href="https://github.com/YaoYao-Pig" target="_blank" className="hover:text-[#00f0ff]"><Github size={18} /></a>
         </div>
       </header>
 
