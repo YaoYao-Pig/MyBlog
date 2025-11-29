@@ -1,0 +1,45 @@
+name: Deploy Blog
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+  # 每天早上 8 点自动检查更新 (可选)
+  schedule:
+    - cron: '0 0 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Blog Code
+        uses: actions/checkout@v3
+
+      - name: Checkout Notes Content
+        uses: actions/checkout@v3
+        with:
+          repository: YaoYao-Pig/YaoYaoPigStudyNote # 你的笔记仓库
+          path: public/content # 把笔记下载到这里
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Generate Structure JSON
+        run: node scripts/generate-tree.js
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+
