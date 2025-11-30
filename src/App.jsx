@@ -182,7 +182,7 @@ export default function App() {
   const [fileSystem, setFileSystem] = useState(MOCK_FILE_SYSTEM); 
   const [viewState, setViewState] = useState('list'); 
   const [loading, setLoading] = useState(true);
-  const [showFilters, setShowFilters] = useState(true); // 滤镜开关
+  const [showFilters, setShowFilters] = useState(true); 
 
   const BASE_URL = import.meta.env.BASE_URL;
 
@@ -260,7 +260,6 @@ export default function App() {
             <Terminal className="text-[#00ff41]" />
             <GlitchText text="YAOYAO_PIG.sys" className="font-bold font-mono text-xl tracking-tighter" />
           </div>
-          {/* 滤镜开关按钮 */}
           <button 
             onClick={() => setShowFilters(!showFilters)}
             className="p-1 rounded hover:bg-[#333] text-gray-500 hover:text-[#00ff41] transition-colors"
@@ -364,7 +363,7 @@ export default function App() {
                             // 1. 如果是 Inline 代码 (行内 `code`)
                             if (inline) {
                               return (
-                                <code className="bg-[#333]/50 text-[#00ff41] px-1.5 py-0.5 rounded font-mono text-sm border border-[#333]/50" {...props}>
+                                <code className="bg-[#2a2a2a] text-gray-300 px-1.5 py-0.5 rounded font-mono text-sm" {...props}>
                                   {children}
                                 </code>
                               );
