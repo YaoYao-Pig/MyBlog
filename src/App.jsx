@@ -358,21 +358,23 @@ export default function App() {
                             </div>
                           ),
 
-                          // 代码块美化 (区分 Inline 和 Block)
+                          // 代码块美化 (区分 Inline 和 Block - 强制检测换行符)
                           code({node, inline, className, children, ...props}) {
-                            // 1. 如果是 Inline 代码 (行内 `code`)
-                            if (inline) {
+                            // 无论 inline 属性如何，如果内容没有换行符，强制视为行内代码
+                            const content = String(children).replace(/\n$/, '');
+                            const isMultiLine = content.includes('\n');
+                            
+                            if (!isMultiLine) {
                               return (
-                                <code className="bg-[#2a2a2a] text-gray-300 px-1.5 py-0.5 rounded font-mono text-sm" {...props}>
+                                <code className="bg-[#2a2a2a] text-gray-300 px-1.5 py-0.5 rounded font-mono text-sm align-middle" {...props}>
                                   {children}
                                 </code>
                               );
                             }
                             
-                            // 2. 如果是 Block 代码 (```block```)
+                            // 多行代码才使用 Terminal 风格
                             return (
                               <div className="my-6 rounded-lg overflow-hidden border border-[#333] bg-[#050505] shadow-lg">
-                                {/* 终端头部 */}
                                 <div className="bg-[#1a1a1a] px-4 py-2 flex items-center justify-between border-b border-[#333]">
                                   <div className="flex space-x-2">
                                     <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
