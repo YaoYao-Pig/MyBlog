@@ -4,7 +4,7 @@ import {
   Terminal, Folder, FileText, ArrowLeft, 
   Cpu, Zap, Github, Mail,
   ChevronRight, Hash, Layers, RefreshCw, Disc,
-  ExternalLink, User, List, AlignRight
+  ExternalLink, User, List, AlignRight, Eye, EyeOff
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown'; 
 
