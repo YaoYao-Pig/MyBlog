@@ -182,6 +182,7 @@ export default function App() {
   const [fileSystem, setFileSystem] = useState(MOCK_FILE_SYSTEM); 
   const [viewState, setViewState] = useState('list'); 
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(true); // 滤镜开关
 
   const BASE_URL = import.meta.env.BASE_URL;
 
@@ -250,14 +251,25 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#ff003c] selection:text-white overflow-x-hidden">
-      <MatrixRain />
-      <div className="fixed inset-0 pointer-events-none z-50 bg-[length:100%_2px,3px_100%] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))]" />
+      {showFilters && <MatrixRain />}
+      {showFilters && <div className="fixed inset-0 pointer-events-none z-50 bg-[length:100%_2px,3px_100%] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))]" />}
 
       <header className="fixed top-0 left-0 w-full h-16 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-[#333] z-40 flex items-center justify-between px-6">
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('home')}>
-          <Terminal className="text-[#00ff41]" />
-          <GlitchText text="YAOYAO_PIG.sys" className="font-bold font-mono text-xl tracking-tighter" />
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('home')}>
+            <Terminal className="text-[#00ff41]" />
+            <GlitchText text="YAOYAO_PIG.sys" className="font-bold font-mono text-xl tracking-tighter" />
+          </div>
+          {/* 滤镜开关按钮 */}
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className="p-1 rounded hover:bg-[#333] text-gray-500 hover:text-[#00ff41] transition-colors"
+            title={showFilters ? "Disable VFX" : "Enable VFX"}
+          >
+            {showFilters ? <Eye size={18} /> : <EyeOff size={18} />}
+          </button>
         </div>
+        
         <nav className="hidden md:flex items-center space-x-1">
           {['HOME', 'BLOG', 'PROJECTS'].map((tab) => (
             <button
@@ -347,9 +359,19 @@ export default function App() {
                             </div>
                           ),
 
-                          // 代码块美化
+                          // 代码块美化 (区分 Inline 和 Block)
                           code({node, inline, className, children, ...props}) {
-                            return !inline ? (
+                            // 1. 如果是 Inline 代码 (行内 `code`)
+                            if (inline) {
+                              return (
+                                <code className="bg-[#333]/50 text-[#00ff41] px-1.5 py-0.5 rounded font-mono text-sm border border-[#333]/50" {...props}>
+                                  {children}
+                                </code>
+                              );
+                            }
+                            
+                            // 2. 如果是 Block 代码 (```block```)
+                            return (
                               <div className="my-6 rounded-lg overflow-hidden border border-[#333] bg-[#050505] shadow-lg">
                                 {/* 终端头部 */}
                                 <div className="bg-[#1a1a1a] px-4 py-2 flex items-center justify-between border-b border-[#333]">
@@ -364,9 +386,7 @@ export default function App() {
                                   <code className="text-sm font-mono text-gray-300 whitespace-pre-wrap" {...props}>{children}</code>
                                 </div>
                               </div>
-                            ) : (
-                              <code className="bg-[#1a1a1a] text-[#00ff41] px-1.5 py-0.5 rounded font-mono text-sm border border-[#333]" {...props}>{children}</code>
-                            )
+                            );
                           },
                           
                           // 图片路径修复
