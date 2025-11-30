@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Terminal, Folder, FileText, ArrowLeft, 
-  Cpu, Zap, Github, Mail, Globe,
+  Cpu, Zap, Github, Mail,
   ChevronRight, Hash, Layers, RefreshCw, Disc,
-  ExternalLink, User, Code
+  ExternalLink, User, List, AlignRight
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown'; 
 
