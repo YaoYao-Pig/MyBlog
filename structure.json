@@ -7,6 +7,11 @@
       "type": "folder",
       "children": [
         {
+          "name": "C# 基础面经.md",
+          "type": "file",
+          "path": "C#/C# 基础面经.md"
+        },
+        {
           "name": "C# 异步，状态机和多线程.md",
           "type": "file",
           "path": "C#/C# 异步，状态机和多线程.md"
@@ -539,11 +544,6 @@
       ]
     },
     {
-      "name": "Untitled.md",
-      "type": "file",
-      "path": "Untitled.md"
-    },
-    {
       "name": "assets",
       "type": "folder",
       "children": []
@@ -644,6 +644,11 @@
           "path": "帧同步/网络通信架构.md"
         }
       ]
+    },
+    {
+      "name": "搜集的小文章.md",
+      "type": "file",
+      "path": "搜集的小文章.md"
     },
     {
       "name": "摇摇猪猛猛刷题",
@@ -1025,6 +1030,11 @@
           "name": "assets",
           "type": "folder",
           "children": []
+        },
+        {
+          "name": "帧同步项目的拷打.md",
+          "type": "file",
+          "path": "项目总结/帧同步项目的拷打.md"
         },
         {
           "name": "游戏开发总结.md",
