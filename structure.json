@@ -1032,6 +1032,42 @@
           "children": []
         },
         {
+          "name": "帧同步",
+          "type": "folder",
+          "children": [
+            {
+              "name": "EntityManager.md",
+              "type": "file",
+              "path": "项目总结/帧同步/EntityManager.md"
+            },
+            {
+              "name": "InputManager.md",
+              "type": "file",
+              "path": "项目总结/帧同步/InputManager.md"
+            },
+            {
+              "name": "UIManager.md",
+              "type": "file",
+              "path": "项目总结/帧同步/UIManager.md"
+            },
+            {
+              "name": "assets",
+              "type": "folder",
+              "children": []
+            },
+            {
+              "name": "动态图集.md",
+              "type": "file",
+              "path": "项目总结/帧同步/动态图集.md"
+            },
+            {
+              "name": "物理碰撞.md",
+              "type": "file",
+              "path": "项目总结/帧同步/物理碰撞.md"
+            }
+          ]
+        },
+        {
           "name": "帧同步项目的拷打.md",
           "type": "file",
           "path": "项目总结/帧同步项目的拷打.md"
