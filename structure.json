@@ -495,6 +495,11 @@
           "path": "Unity/Unity基础面经.md"
         },
         {
+          "name": "Unity文件管理.md",
+          "type": "file",
+          "path": "Unity/Unity文件管理.md"
+        },
+        {
           "name": "Unity生命周期.md",
           "type": "file",
           "path": "Unity/Unity生命周期.md"
