@@ -440,11 +440,6 @@
           "path": "Unity/Delegate和Event.md"
         },
         {
-          "name": "MVC.md",
-          "type": "file",
-          "path": "Unity/MVC.md"
-        },
-        {
           "name": "Prefab本质初探.md",
           "type": "file",
           "path": "Unity/Prefab本质初探.md"
@@ -555,6 +550,11 @@
               ]
             }
           ]
+        },
+        {
+          "name": "设计模式.md",
+          "type": "file",
+          "path": "Unity/设计模式.md"
         }
       ]
     },
@@ -1082,6 +1082,11 @@
               "path": "项目总结/帧同步/InputManager.md"
             },
             {
+              "name": "Logic和View.md",
+              "type": "file",
+              "path": "项目总结/帧同步/Logic和View.md"
+            },
+            {
               "name": "UIManager.md",
               "type": "file",
               "path": "项目总结/帧同步/UIManager.md"
@@ -1097,9 +1102,19 @@
               "path": "项目总结/帧同步/动态图集.md"
             },
             {
+              "name": "数学库.md",
+              "type": "file",
+              "path": "项目总结/帧同步/数学库.md"
+            },
+            {
               "name": "物理碰撞.md",
               "type": "file",
               "path": "项目总结/帧同步/物理碰撞.md"
+            },
+            {
+              "name": "网络层.md",
+              "type": "file",
+              "path": "项目总结/帧同步/网络层.md"
             },
             {
               "name": "资源管理.md",
