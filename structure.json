@@ -568,9 +568,29 @@
       "type": "folder",
       "children": [
         {
+          "name": "assets",
+          "type": "folder",
+          "children": []
+        },
+        {
           "name": "一轮八股.md",
           "type": "file",
           "path": "八股/一轮八股.md"
+        },
+        {
+          "name": "一轮真题.md",
+          "type": "file",
+          "path": "八股/一轮真题.md"
+        },
+        {
+          "name": "实习.md",
+          "type": "file",
+          "path": "八股/实习.md"
+        },
+        {
+          "name": "算法.md",
+          "type": "file",
+          "path": "八股/算法.md"
         }
       ]
     },
@@ -670,6 +690,11 @@
           "path": "帧同步/网络通信架构.md"
         }
       ]
+    },
+    {
+      "name": "想要买的游戏.md",
+      "type": "file",
+      "path": "想要买的游戏.md"
     },
     {
       "name": "搜集的小文章.md",
@@ -1113,6 +1138,11 @@
               "path": "项目总结/帧同步/动态图集.md"
             },
             {
+              "name": "回滚.md",
+              "type": "file",
+              "path": "项目总结/帧同步/回滚.md"
+            },
+            {
               "name": "数学库.md",
               "type": "file",
               "path": "项目总结/帧同步/数学库.md"
@@ -1143,6 +1173,11 @@
           "name": "游戏开发总结.md",
           "type": "file",
           "path": "项目总结/游戏开发总结.md"
+        },
+        {
+          "name": "红点树.md",
+          "type": "file",
+          "path": "项目总结/红点树.md"
         }
       ]
     }

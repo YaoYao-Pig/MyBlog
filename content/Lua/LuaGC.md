@@ -36,7 +36,7 @@ LuaGC是一个状态机，那么讨论状态机的状态就很有必要，LuaGC�
       - 清除所有灰色对象列表 (`cleargraylists`)。
       - 重置 `GCmarked` 计数器（用于统计标记的字节数）。
       - 标记根集合 (Root Set)，包括：
-        - 主线程 (`markobject(g, mainthread(g))`)。
+        - 主线程 (`markobject(g, mainthread(g))`) 和线程栈。
         - 注册表 (`markvalue(g, &g->l_registry)`)。
         - 所有基本类型的元表 (`markmt`)。
         - 可能存在的、上一周期未完成终结的对象 (`markbeingfnz`)。
@@ -52,7 +52,7 @@ LuaGC是一个状态机，那么讨论状态机的状态就很有必要，LuaGC�
      - 不同类型的对象有不同的遍历方式（`traversetable`, `traverseLclosure`, `traversethread` 等）。
    - 此阶段会持续进行，直到灰色列表为空，或者GC步进控制暂停了当前工作。
    - 如果灰色列表为空（或在 "fast" 模式下），状态切换到 `GCSenteratomic`。
-   - **写屏障** 在此阶段非常重要。如果mutator修改了一个黑色对象的引用，使其指向一个白色对象，写屏障会确保该白色对象被正确地标记为灰色，以防被遗漏。
+   - <span style="color:#FFB266;">**写屏障** 在此阶段非常重要。如果mutator修改了一个黑色对象的引用，使其指向一个白色对象，写屏障会确保该白色对象被正确地标记为灰色，以防被遗漏。</span>
 
 3. **原子阶段 (GCSatomic)**（主要是因为渐进式GC的问题）
 
@@ -65,11 +65,11 @@ LuaGC是一个状态机，那么讨论状态机的状态就很有必要，LuaGC�
      - 标记注册表 (`markvalue(g, &g->l_registry)`)。
      - 标记所有基本类型的元表 (`markmt(g)`)。 这些对象可能在C API调用中被修改，因此需要在原子阶段重新确认其可达性。
 
-     **完成所有标记传播 (`propagateall(g)`)**：
+     <span style="color:#FFCC99;">**完成所有标记传播 (`propagateall(g)`)**：</span>
 
-     - 清空 `g->gray` 列表，将所有灰色对象及其引用的对象标记为黑色。
+     - <span style="color:#FFCC99;">清空 `g->gray` 列表，将所有灰色对象及其引用的对象标记为黑色。</span>
 
-     - ###### 处理 `g->grayagain` 列表：这个列表包含了那些在标记阶段被后向写屏障标记（例如，黑色对象被修改后重新变灰）或者需要特殊处理（如线程、某些弱表）的对象。再次调用 `propagateall(g)` 来处理这些对象。
+     - ###### <span style="color:#FFCC99;">处理 `g->grayagain` 列表：这个列表包含了那些在标记阶段被后向写屏障标记（例如，黑色对象被修改后重新变灰）或者需要特殊处理（如线程、某些弱表）的对象。再次调用 `propagateall(g)` 来处理这些对象。</span>
 
      **重新处理Upvalues (`remarkupvals(g)`)**： 对于可能已经死亡但其upvalue仍活动的线程，需要重新检查这些upvalue指向的值，确保它们被正确标记。
 
@@ -85,7 +85,7 @@ LuaGC是一个状态机，那么讨论状态机的状态就很有必要，LuaGC�
 
      **清空字符串缓存 (`luaS_clearcache(g)`)**： API中用于字符串的缓存可能包含已死的字符串。
 
-     ###### **翻转白色 (`g->currentwhite = cast_byte(otherwhite(g))`)**： 这是为下一轮GC做准备的关键步骤。当前所有被标记为存活的对象（黑色）在下一轮GC开始时，相对于新的 `currentwhite` 将是“旧的白色”。新分配的对象将使用新的 `te`。这个全局状态的改变必须是原子的。
+     ###### <span style="color:#FFB266;">**翻转白色 (`g->currentwhite = cast_byte(otherwhite(g))`)**： 这是为下一轮GC做准备的关键步骤。当前所有被标记为存活的对象（黑色）在下一轮GC开始时，相对于新的 `currentwhite` 将是“旧的白色”。新分配的对象将使用新的 `te`。这个全局状态的改变必须是原子的。</span>
 
 4. **清扫阶段 (GCSswp\*)** 这个阶段也是增量执行的，通过 `sweepstep` 函数逐步进行。
 
@@ -102,22 +102,44 @@ LuaGC是一个状态机，那么讨论状态机的状态就很有必要，LuaGC�
 >
 >    **写屏障有一个非常重要的部分，就是写屏障的加入是为了处理渐进式GC，也就是在GC的时候，程序也会执行**，这时候就会有两个问题：1. 如果本来被标记为黑色的object，指向了一个新创建的白色object怎么办，2. 本来是黑色的object，被修改了怎么办（比如本身黑色的object是一个表，表中的元素被移除了）
 >
->    ​	1. **`luaC_barrier_` (前向屏障 / Forward Barrier)**
+>    <span style="color:#66FF66;">当发生了：一个已经扫描过的黑色引用对象本身或者内部指向一个白色对象的时候。发生写屏障：</span>
 >
+>    <span style="color:#66FF66;">如果不是table类型，而是userdata或者Closure的时候，那么触发前向屏障</span>
+>
+>    <span style="color:#66FF66;">反之触发后向屏障</span>
+>
+>    > 当 GC 处于 **黑色（Black）** 状态的对象，试图引用一个 **白色（White）** 对象时：
+>    >
+>    > **1. 看看“谁”在引用？（发起者是谁）**
+>    >
+>    > - **如果发起者是 Table：**
+>    >   - **触发：** **后向屏障 (Barrier Back)**
+>    >   - **动作：** Table 变回灰色，放入 `grayagain` 列表。
+>    >   - **理由：** Table 变动太频繁，推迟到原子阶段处理。
+>    > - **如果发起者是 Userdata、Closure (函数)、Thread (协程)：**
+>    >   - **触发：** **前向屏障 (Barrier Forward)**
+>    >   - **动作：** 被引用的白色对象立刻变灰（加入 `graylist`）。
+>    >   - **理由：** 这些对象变动不频繁，立即处理更划算。
+>    > - **如果发起者是 String：**
+>    >   - **触发：** **不可能发生**
+>    >   - **理由：** 字符串不可变。
+>    
+>    <span style="color:#FFB266;">	1. **`luaC_barrier_` (前向屏障 / Forward Barrier)**</span>
+>    
 >    **核心目的**：防止一个**黑色 (black)** 对象（GC已扫描完毕）直接指向一个**白色 (white)** 对象（GC尚未扫描或认为是潜在垃圾），因为这可能导致白色对象被错误回收
->
+>    
 >    当一个**已被标记为黑色 (black) 的对象 `o`**（父对象）的某个字段（例如，表的一个元素，闭包的一个upvalue，userdata的一个uservalue）被**赋值或修改**，使其**指向了一个白色 (white) 的对象 `v`**（子对象）时，前向屏障会被触发。
->
+>    
 >    如果对象 `v` 是简单类型（如字符串、已关闭的upvalue）或者是不需要进一步扫描其内部引用的类型（如没有uservalue的userdata），它会直接被标记为**黑色**。
->
+>    
 >    如果对象 `v` 是复杂类型（如表、闭包、线程、包含uservalue的userdata、原型），它会被标记为**灰色**，并通过 `linkobjgclist(o, g->gray)` 链接到**`g->gray`** 列表中。
->
->    ​	2.  **`luaC_barrierback_` (后向屏障 / Backward Barrier)**
->
+>    
+>    <span style="color:#FFB266;">	2.  **`luaC_barrierback_` (后向屏障 / Backward Barrier)**（专门用于table）</span>
+>    
 >    **核心目的**：当一个**黑色 (black) 对象 `o`** 的内容或结构发生改变（例如，表中的元素被移除，或者元表被替换），导致它之前通过其他路径可达的某些对象可能不再通过它可达，或者它自身需要被重新评估其引用关系时，这个屏障会被触发。它确保GC不会因为这种修改而丢失对某些对象的跟踪。
->
+>    
 >    **触发时机**： 当一个**已被标记为黑色 (black) 的对象 `o`** 发生某些类型的修改时，即使没有直接创建一个新的“黑指向白”的引用，也可能需要后向屏障。
->
+>    
 >    主要操作是将这个黑色对象 `o` **重新标记为灰色**，并将其链接到 `g->grayagain` 列表。
 >
 > 
@@ -140,19 +162,19 @@ LuaGC是一个状态机，那么讨论状态机的状态就很有必要，LuaGC�
 >
 >       - 注册表是一个特殊的、C代码可以访问的表，用于存储需要在不同C调用之间共享的Lua值，或者一些全局性的配置信息。它的内容必须被保留。`markvalue(g, &g->l_registry)` 标记注册表本身及其内容。
 >       - 注册表中预定义了一些重要的槽位，例如：
->         - `LUA_RIDX_GLOBALS` (索引2)：指向全局环境表 (`_G`)。
+>         - `LUA_RIDX_GLOBALS` (索引2)：<span style="color:#FFB266;">指向全局环境表 (`_G`)。</span>
 >         - `LUA_RIDX_MAINTHREAD` (索引3)：指回主线程。
 >         - `LUA_LOADED_TABLE` (`_LOADED`): 存储已加载模块的表。
 >         - `LUA_PRELOAD_TABLE` (`_PRELOAD`): 存储预加载模块的加载器。
 >         - `CLIBS` (`_CLIBS`): 存储已加载的C库的句柄。
 >
->       **当前活动线程的栈 (`L->stack.p` 到 `L->top.p`)**：
+>       <span style="color:#FFB266;">**当前活动线程的栈 (`L->stack.p` 到 `L->top.p`)**：</span>
 >
 >       - 在原子阶段，会显式调用 `markobject(g, L)` 来标记当前正在执行的线程 `L`（如果它与主线程不同的话，但通常原子阶段是在主线程或某个线程的上下文中执行）。
 >       - `traversethread(g, th)` 函数会遍历线程 `th` 的整个活动栈，从 `th->stack.p` 到 `th->top.p`，标记所有栈上的值（局部变量、函数参数、临时值等）。
 >       - 每个 `CallInfo` 结构（代表一个函数调用帧）中的 `ci->func` 指向栈上的函数对象，也是根。
 >
->       **打开的Upvalues (`L->openupval` 和 `g->twups`)**：
+>       <span style="color:#FFB266;">**打开的Upvalues (`L->openupval` 和 `g->twups`)**：</span>
 >
 >       - 所有线程中打开的upvalue（那些仍然指向栈上局部变量的upvalue）必须被视为根，因为它们引用的局部变量可能仍然存活，或者闭包本身是存活的。
 >       - `traversethread` 会遍历线程的 `openupval` 列表，标记这些upvalue对象。
@@ -170,7 +192,7 @@ LuaGC是一个状态机，那么讨论状态机的状态就很有必要，LuaGC�
 >
 >       - 这个列表包含那些永远不应被GC回收的对象，例如Lua的保留字字符串、元方法名字符串、以及内存错误消息字符串 (`g->memerrmsg`)。 `luaC_fix` 函数用于将对象移到这个列表。
 >
->       **C API中通过 `luaL_ref` 创建的引用**：
+>       <span style="color:#FFB266;">**C API中通过 `luaL_ref` 创建的引用**：</span>
 >
 >       - 当C代码使用 `luaL_ref` 在一个表中创建一个引用时，这个被引用的对象实际上是被存储在作为参数传入的那个表（通常是注册表）中。由于注册表是根，所以这些被引用的对象也就间接成为了根。当使用 `luaL_unref` 时，这个引用才从表中移除，对象才可能被回收。
 >

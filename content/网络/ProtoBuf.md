@@ -84,7 +84,25 @@ proto采用keyValue的方法。value是值，也就是上面说的Varint和Float
 Tag = (字段名编号 << 3) | 字段类型
 ```
 
+```protobuf
+message Test{ 
+	int id = 1, //注意：这个1和下面的2就是字段名编号，它要求messgae里唯一
+	string name = 2,
+}
+```
+
+
+
 字段类型就是Wire Type
+
+| **Wire Type ID** | **名称 (Name)**      | **数据结构 (Structure)** | **对应的 Proto 语言类型 (Data Types)**                       |
+| ---------------- | -------------------- | ------------------------ | ------------------------------------------------------------ |
+| **0**            | **Varint**           | 变长编码                 | `int32`, `int64`, `uint32`, `uint64`, `sint32`, `sint64`, `bool`, `enum` |
+| **1**            | **64-bit**           | 固定 8 字节              | `fixed64`, `sfixed64`, `double`                              |
+| **2**            | **Length-delimited** | 长度前缀 + 数据          | `string`, `bytes`, `embedded messages` (嵌套消息), `packed repeated fields` |
+| **3**            | **Start Group**      | (已弃用)                 | Groups (Deprecated)                                          |
+| **4**            | **End Group**        | (已弃用)                 | Groups (Deprecated)                                          |
+| **5**            | **32-bit**           | 固定 4 字节              | `fixed32`, `sfixed32`, `float`                               |
 
 ![fb58fa774a9149847a97b6b512ad8167](./assets/fb58fa774a9149847a97b6b512ad8167.jpg)
 
@@ -113,6 +131,46 @@ message SubMsg{
 对于字符串，Proto采用的是长度前缀的编码：也就是Tag - Length - Value
 
 Tag上面说过了，Length是一个Varint编码的数字，表示后面的字符串有多少个字节，Value就是真是的字节内容，用的是UTF-8
+
+
+
+## 限制
+
+### Varint 的极限与坑
+
+Varint 的设计是用 **空间换时间/灵活性**，但在处理大数时，它其实是 **亏本** 的。
+
+#### A. 物理极限：10 字节 (The 10-Byte Wall)
+
+Varint 编码规则是每个字节只有 7 位用于存储数据（1位用于标记）。
+
+ProtoBuf 支持的最大整数类型是 64 位（uint64, int64）。
+
+我们要存下 64 个 bit，需要多少个 7-bit 的组？
+$$
+\lceil 64 / 7 \rceil = 10
+$$
+
+
+- **结论：** 一个 Varint **最多占用 10 个字节**。
+- **硬限制：** 绝大多数标准 ProtoBuf 解析器（C++, Java, Go 等）在读取 Varint 时，如果读到第 11 个字节仍然发现 MSB（最高位）是 1，会直接抛出 `Malformed Protocol Buffer` 异常。它不会允许无限长的 Varint 存在。
+
+#### B. 效率极限：何时亏本？ (Varint vs Fixed)
+
+Varint 并不总是省空间的。
+
+- **Fixed64:** 永远固定 8 字节。
+- **Varint:** 随着数值变大，长度从 1 字节涨到 10 字节。
+
+分水岭在哪里？
+
+当数值大于 $2^{56}$ 时（即需要 8 个 7-bit 组以上,其实就是最后的8x7），Varint 需要 9 或 10 个字节。
+
+此时 Varint 比 Fixed64（8字节）还要大！
+
+> **场景提示：** 如果你在存 **随机的大整数**（如哈希值、随机 ID、加密数据的 Key），千万别用 Varint（即别用 `uint64`），请直接使用 `fixed64`。
+
+
 
 ## Reference：
 

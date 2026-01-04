@@ -6,11 +6,7 @@
 
 **函数原型**：
 
-```
-c
-
-
-复制编辑
+```c
 void *memset(void *s, int c, size_t n);
 ```
 
